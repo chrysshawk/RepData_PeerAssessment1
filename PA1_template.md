@@ -85,14 +85,15 @@ cAct <- act
 # Determining NAs and replacing with means for the given interval
 for (i in 1:nrow(cAct)) {
      if (is.na(cAct$steps[i])) {
+          # Rounding the steps with 0 decimals
           cAct$steps[i] <- 
-               intervalMean$Steps[intervalMean$Interval == 
-                                       cAct$interval[i]]
+               round(intervalMean$Steps[intervalMean$Interval == 
+                                       cAct$interval[i]], 0)
      }
 }
 ```
 
-4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+4a. Making a histogram of the total number of steps each day
 
 
 ```r
@@ -100,21 +101,25 @@ for (i in 1:nrow(cAct)) {
 cDailyAct <- aggregate(cAct$steps, by = list(cAct$date), FUN = sum)
 names(cDailyAct) <- c("Date", "Steps")
 
-# Plotting total steps with complete dataset
+# Calculating and reporting the mean and median steps per day
+cDailyMean <- mean(cDailyAct$Steps)
+cDailyMedian <- median(cDailyAct$Steps)
+
+# Plotting total steps with complete dataset, incl daily mean & median
 ggplot(data = cDailyAct, aes(x=Date, y=Steps)) +
      geom_col(col="black", fill = "blue", 
               width = 1, alpha=.5) +
+     geom_hline(aes(yintercept = cDailyMean, linetype = "Daily mean"), 
+                    col="red", size = 1) +
      theme_light() +
+     scale_linetype_manual(name = "", values = c(3,1), guide =
+                                guide_legend(override.aes =
+                                                  list(color="red"))) +
      labs(title = "Total steps per day")
 ```
 
 ![](PA1_template_files/figure-html/histTotals-1.png)<!-- -->
 
-```r
-# Calculating and reporting the mean and median steps per day
-cDailyMean <- mean(cDailyAct$Steps, na.rm = TRUE)
-cDilyMedian <- median(cDailyAct$Steps, na.rm = TRUE)
-```
-
+4b. The impact of imputing the NAs in the dataset is that the mean has changed to 1.0765639\times 10^{4} (from 1.0766189\times 10^{4}) and the median has changed to 1.0762\times 10^{4} (from 10765).
 
 ## Are there differences in activity patterns between weekdays and weekends?
