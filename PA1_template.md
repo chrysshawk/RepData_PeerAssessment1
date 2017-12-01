@@ -1,32 +1,28 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-author: "Christoffer Haukvik"
-output: 
-  html_document: 
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
+Christoffer Haukvik  
 
 
 ## Loading and preprocessing the data
 First, the data is extracted and loaded to a dataframe from the given "activity.zip" file.
-```{r preprocessing}
+
+```r
 act <- read.csv(unzip("activity.zip"))
 act$date <- as.Date(as.character(act$date), "%Y-%m-%d")
-
 ```
 
 
 ## What is mean total number of steps taken per day?
 
 1. Calculating the total steps per day
-```{r totalsteps}
+
+```r
 dailyAct <- aggregate(act$steps, by = list(act$date), FUN = sum)
 names(dailyAct) <- c("Date", "Steps")
-
 ```
 
 2. Plotting the total number of steps per day
-```{r stepHistogram, warning=FALSE}
+
+```r
 library(ggplot2)
 ggplot(data = dailyAct, aes(x=Date, y=Steps)) +
      geom_col(col="black", fill = "blue", 
@@ -35,19 +31,22 @@ ggplot(data = dailyAct, aes(x=Date, y=Steps)) +
      labs(title = "Total steps per day")
 ```
 
+![](PA1_template_files/figure-html/stepHistogram-1.png)<!-- -->
+
 3. Calculating the mean and median steps per day
-```{r dailyStats, results="asis"}
+
+```r
 dailyMean <- mean(dailyAct$Steps, na.rm = TRUE)
 dailyMedian <- median(dailyAct$Steps, na.rm = TRUE)
-
 ```
-Mean steps per day are `r dailyMean`.  
-Median steps per day are `r dailyMedian`.
+Mean steps per day are 1.0766189\times 10^{4}.  
+Median steps per day are 10765.
 
 ## What is the average daily activity pattern?
 
 1. Time series plot of the 5-minute intervals and mean steps taken
-```{r activityPattern}
+
+```r
 intervalMean <- aggregate(act$steps, by = list(act$interval), 
                          FUN = mean, na.rm = TRUE)
 names(intervalMean) <- c("Interval", "Steps")
@@ -55,24 +54,31 @@ ggplot(data = intervalMean, aes(x=Interval, y=Steps)) +
      geom_line(colour="blue", size = 1) +
      theme_light() + 
      labs(title = "Mean steps per 5-min interval")
-
 ```
+
+![](PA1_template_files/figure-html/activityPattern-1.png)<!-- -->
 
 2. Which 5-minute interval on average contains the max number of steps?
-```{r maxInterval}
+
+```r
 intervalMax <- intervalMean[which.max(intervalMean$Steps), ]
 ```
-The 5-minute interval `r intervalMax$Interval` has the most steps (`r round(intervalMax$Steps, 0)` steps).
+The 5-minute interval 835 has the most steps (206 steps).
 
 ## Imputing missing values
 1. Calculating and reporting the total number of missing values (NAs) in the dataset.
-```{r missingValues}
-length(is.na(act))
 
+```r
+length(is.na(act))
+```
+
+```
+## [1] 52704
 ```
 
 2 & 3. Filling in the missing values in the dataset using mean of the given 5-minute interval
-```{r imputeNAs}
+
+```r
 # Creating a new dataset for complete interval measurements
 cAct <- act
 
@@ -84,31 +90,30 @@ for (i in 1:nrow(cAct)) {
                                        cAct$interval[i]]
      }
 }
-
 ```
 
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-```{r histTotals}
+
+```r
 # Calculating total steps with complete dataset
 cDailyAct <- aggregate(cAct$steps, by = list(cAct$date), FUN = sum)
 names(cDailyAct) <- c("Date", "Steps")
 
-# Calculating and reporting the mean and median steps per day
-cDailyMean <- mean(cDailyAct$Steps, na.rm = TRUE)
-cDilyMedian <- median(cDailyAct$Steps, na.rm = TRUE)
-
-# Plotting total steps with complete dataset, incl daily mean & median
+# Plotting total steps with complete dataset
 ggplot(data = cDailyAct, aes(x=Date, y=Steps)) +
      geom_col(col="black", fill = "blue", 
               width = 1, alpha=.5) +
-     geom_hline(yintercept = cDailyMean, col="red", lty = "dotted",
-                size = 1, show.legend = TRUE) +
      theme_light() +
      labs(title = "Total steps per day")
+```
 
+![](PA1_template_files/figure-html/histTotals-1.png)<!-- -->
 
-
+```r
+# Calculating and reporting the mean and median steps per day
+cDailyMean <- mean(cDailyAct$Steps, na.rm = TRUE)
+cDilyMedian <- median(cDailyAct$Steps, na.rm = TRUE)
 ```
 
 
